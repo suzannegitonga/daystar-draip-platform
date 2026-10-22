@@ -22,7 +22,10 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 const assetRoutes = require('./routes/assetRoutes');
+const authRoutes = require('./routes/authRoutes'); // New import
+
 app.use('/api/assets', assetRoutes);
+app.use('/api/auth', authRoutes); // New route mapping
 
 // Basic health check route
 app.get('/api/health', (req, res) => {

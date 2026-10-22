@@ -7,6 +7,7 @@ const stream = require('stream');
 // @route   POST /api/assets
 const createAsset = async (req, res) => {
   try {
+    req.body.owner = req.user._id; // Dynamically assign the logged-in user
     const asset = new ResearchAsset(req.body);
     const savedAsset = await asset.save();
     res.status(201).json({ status: 'success', data: savedAsset });
@@ -40,14 +41,13 @@ const importCSV = async (req, res) => {
   bufferStream
     .pipe(csv())
     .on('data', (data) => {
-      // Map CSV columns to our schema. 
-      // We inject the hardcoded owner for now, just like the manual form.
+      // Map CSV columns to our schema
       results.push({
         title: data.Title || data.title,
         school: data.School || data.school,
         discipline: data.Discipline || data.discipline,
         status: data.Status ? data.Status.toLowerCase() : 'draft',
-        owner: '650c1f1e1c9d440000a1b1c3' 
+        owner: req.user._id // Dynamically assign the logged-in user
       });
     })
     .on('end', async () => {
