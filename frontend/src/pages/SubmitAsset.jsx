@@ -2,7 +2,6 @@ import { useState } from 'react';
 import axios from 'axios';
 
 export default function SubmitAsset() {
-  // 1. Define the state for the form inputs
   const [formData, setFormData] = useState({
     title: '',
     school: '',
@@ -10,10 +9,8 @@ export default function SubmitAsset() {
     status: 'draft',
   });
   
-  // State for success/error messages
   const [message, setMessage] = useState('');
 
-  // 2. Handle input changes dynamically
   const handleChange = (e) => {
     setFormData({ 
       ...formData, 
@@ -21,24 +18,22 @@ export default function SubmitAsset() {
     });
   };
 
-  // 3. Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevents the page from reloading
+    e.preventDefault();
     setMessage('');
     
     try {
-      // Temporarily hardcoding an owner ID until we build user authentication in Phase 4
-      const payload = { 
-        ...formData, 
-        owner: '650c1f1e1c9d440000a1b1c3' 
-      };
+      // Retrieve the saved JWT token from localStorage
+      const token = localStorage.getItem('token');
       
-      // Send POST request to the Express backend
-      const response = await axios.post('http://localhost:5000/api/assets', payload);
+      const response = await axios.post('http://localhost:5000/api/assets', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       
       if (response.data.status === 'success') {
         setMessage('Asset submitted successfully!');
-        // Reset the form
         setFormData({ title: '', school: '', discipline: '', status: 'draft' });
       }
     } catch (error) {
@@ -50,7 +45,6 @@ export default function SubmitAsset() {
     <div style={{ maxWidth: '600px', margin: '0 auto', fontFamily: 'sans-serif' }}>
       <h2>Submit Research Asset</h2>
       
-      {/* Display feedback messages */}
       {message && (
         <div style={{ 
           padding: '1rem', 
