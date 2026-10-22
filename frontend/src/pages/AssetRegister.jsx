@@ -10,6 +10,15 @@ export default function AssetRegister() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  // Inline Edit state
+  const [editingAsset, setEditingAsset] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    school: "",
+    discipline: "",
+    status: "draft",
+  });
+
   // State for CSV Upload
   const [file, setFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
@@ -18,9 +27,7 @@ export default function AssetRegister() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get("http://localhost:5000/api/assets", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setAssets(response.data.data);
       setLoading(false);
@@ -67,6 +74,33 @@ export default function AssetRegister() {
     } catch (err) {
       setUploadMessage(
         "Upload failed: " + (err.response?.data?.message || err.message),
+      );
+    }
+  };
+
+  const handleEditClick = (asset) => {
+    setEditingAsset(asset._id);
+    setEditFormData({
+      title: asset.title,
+      school: asset.school,
+      discipline: asset.discipline,
+      status: asset.status,
+    });
+  };
+
+  const handleUpdateSubmit = async (e, id) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`http://localhost:5000/api/assets/${id}`, editFormData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEditingAsset(null);
+      fetchAssets();
+    } catch (err) {
+      alert(
+        "Failed to update asset: " +
+          (err.response?.data?.message || err.message),
       );
     }
   };
@@ -160,11 +194,7 @@ export default function AssetRegister() {
             style={{
               marginTop: "0.75rem",
               marginBottom: 0,
-              color:
-                uploadMessage.includes("failed") ||
-                uploadMessage.includes("Please")
-                  ? "#d32f2f"
-                  : "#2e7d32",
+              color: uploadMessage.includes("failed") ? "#d32f2f" : "#2e7d32",
               fontWeight: "600",
               fontSize: "0.9rem",
             }}
@@ -197,7 +227,6 @@ export default function AssetRegister() {
             outline: "none",
           }}
         />
-
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -255,7 +284,7 @@ export default function AssetRegister() {
                   Status
                 </th>
                 <th style={{ padding: "0.85rem", textAlign: "left" }}>
-                  Date Submitted
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -265,40 +294,176 @@ export default function AssetRegister() {
                   key={asset._id}
                   style={{ borderBottom: "1px solid #e2e8f0" }}
                 >
-                  <td
-                    style={{
-                      padding: "0.85rem",
-                      color: "#1e293b",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {asset.title}
-                  </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
-                    {asset.school}
-                  </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
-                    {asset.discipline}
-                  </td>
-                  <td style={{ padding: "0.85rem" }}>
-                    <span
-                      style={{
-                        padding: "0.25rem 0.6rem",
-                        borderRadius: "4px",
-                        backgroundColor:
-                          asset.status === "completed" ? "#e8f5e9" : "#fff3e0",
-                        color:
-                          asset.status === "completed" ? "#2e7d32" : "#e65100",
-                        fontSize: "0.8rem",
-                        fontWeight: "600",
-                      }}
+                  {editingAsset === asset._id ? (
+                    <td
+                      colSpan="5"
+                      style={{ padding: "1rem", backgroundColor: "#f8fafc" }}
                     >
-                      {asset.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
-                    {new Date(asset.createdAt).toLocaleDateString()}
-                  </td>
+                      <form
+                        onSubmit={(e) => handleUpdateSubmit(e, asset._id)}
+                        style={{
+                          display: "flex",
+                          gap: "0.75rem",
+                          flexWrap: "wrap",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={editFormData.title}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              title: e.target.value,
+                            })
+                          }
+                          required
+                          style={{
+                            flex: 2,
+                            padding: "0.5rem",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "4px",
+                          }}
+                        />
+                        <input
+                          type="text"
+                          value={editFormData.school}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              school: e.target.value,
+                            })
+                          }
+                          required
+                          style={{
+                            flex: 1,
+                            padding: "0.5rem",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "4px",
+                          }}
+                        />
+                        <input
+                          type="text"
+                          value={editFormData.discipline}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              discipline: e.target.value,
+                            })
+                          }
+                          required
+                          style={{
+                            flex: 1,
+                            padding: "0.5rem",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "4px",
+                          }}
+                        />
+                        <select
+                          value={editFormData.status}
+                          onChange={(e) =>
+                            setEditFormData({
+                              ...editFormData,
+                              status: e.target.value,
+                            })
+                          }
+                          style={{
+                            padding: "0.5rem",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "4px",
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <option value="draft">Draft</option>
+                          <option value="under review">Under Review</option>
+                          <option value="completed">Completed</option>
+                        </select>
+                        <button
+                          type="submit"
+                          style={{
+                            padding: "0.5rem 1rem",
+                            backgroundColor: "#00b4d8",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingAsset(null)}
+                          style={{
+                            padding: "0.5rem 1rem",
+                            backgroundColor: "#64748b",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </form>
+                    </td>
+                  ) : (
+                    <>
+                      <td
+                        style={{
+                          padding: "0.85rem",
+                          color: "#1e293b",
+                          fontWeight: "500",
+                        }}
+                      >
+                        {asset.title}
+                      </td>
+                      <td style={{ padding: "0.85rem", color: "#475569" }}>
+                        {asset.school}
+                      </td>
+                      <td style={{ padding: "0.85rem", color: "#475569" }}>
+                        {asset.discipline}
+                      </td>
+                      <td style={{ padding: "0.85rem" }}>
+                        <span
+                          style={{
+                            padding: "0.25rem 0.6rem",
+                            borderRadius: "4px",
+                            backgroundColor:
+                              asset.status === "completed"
+                                ? "#e8f5e9"
+                                : "#fff3e0",
+                            color:
+                              asset.status === "completed"
+                                ? "#2e7d32"
+                                : "#e65100",
+                            fontSize: "0.8rem",
+                            fontWeight: "600",
+                          }}
+                        >
+                          {asset.status.toUpperCase()}
+                        </span>
+                      </td>
+                      <td style={{ padding: "0.85rem" }}>
+                        <button
+                          onClick={() => handleEditClick(asset)}
+                          style={{
+                            padding: "0.4rem 0.8rem",
+                            backgroundColor: "#0A2540",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            fontWeight: "500",
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>
