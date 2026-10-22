@@ -71,7 +71,6 @@ export default function AssetRegister() {
     }
   };
 
-  // Filter logic for search bar and status dropdown
   const filteredAssets = assets.filter((asset) => {
     const matchesSearch =
       asset.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -86,45 +85,88 @@ export default function AssetRegister() {
   });
 
   return (
-    <div style={{ padding: "1rem", fontFamily: "sans-serif" }}>
-      <h2>DRAIP Asset Register</h2>
+    <div
+      style={{
+        backgroundColor: "#ffffff",
+        padding: "2.5rem",
+        borderRadius: "8px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+      }}
+    >
+      <h2
+        style={{
+          color: "#0A2540",
+          marginTop: 0,
+          marginBottom: "1.5rem",
+          borderBottom: "2px solid #f1f5f9",
+          paddingBottom: "0.75rem",
+        }}
+      >
+        DRAIP Asset Register
+      </h2>
 
       {/* CSV Import Section */}
       <div
         style={{
           marginBottom: "2rem",
-          padding: "1rem",
-          backgroundColor: "#f8f9fa",
-          border: "1px solid #ddd",
-          borderRadius: "4px",
+          padding: "1.25rem",
+          backgroundColor: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: "6px",
         }}
       >
-        <h3 style={{ marginTop: 0 }}>Bulk Import (CSV)</h3>
-        <input type="file" accept=".csv" onChange={handleFileChange} />
-        <button
-          onClick={handleFileUpload}
+        <h3
           style={{
-            marginLeft: "1rem",
-            padding: "0.5rem 1rem",
-            backgroundColor: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
+            marginTop: 0,
+            color: "#0A2540",
+            fontSize: "1rem",
+            marginBottom: "0.75rem",
           }}
         >
-          Upload CSV
-        </button>
+          Bulk Import Records (CSV)
+        </h3>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            style={{ fontSize: "0.9rem" }}
+          />
+          <button
+            onClick={handleFileUpload}
+            style={{
+              padding: "0.5rem 1.25rem",
+              backgroundColor: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.9rem",
+            }}
+          >
+            Upload CSV
+          </button>
+        </div>
         {uploadMessage && (
           <p
             style={{
-              marginTop: "1rem",
+              marginTop: "0.75rem",
+              marginBottom: 0,
               color:
                 uploadMessage.includes("failed") ||
                 uploadMessage.includes("Please")
                   ? "#d32f2f"
                   : "#2e7d32",
-              fontWeight: "bold",
+              fontWeight: "600",
+              fontSize: "0.9rem",
             }}
           >
             {uploadMessage}
@@ -150,8 +192,9 @@ export default function AssetRegister() {
             flex: "1",
             minWidth: "250px",
             padding: "0.75rem",
-            border: "1px solid #ccc",
+            border: "1px solid #cbd5e1",
             borderRadius: "4px",
+            outline: "none",
           }}
         />
 
@@ -160,9 +203,11 @@ export default function AssetRegister() {
           onChange={(e) => setStatusFilter(e.target.value)}
           style={{
             padding: "0.75rem",
-            border: "1px solid #ccc",
+            border: "1px solid #cbd5e1",
             borderRadius: "4px",
             minWidth: "150px",
+            backgroundColor: "#fff",
+            outline: "none",
           }}
         >
           <option value="all">All Statuses</option>
@@ -176,63 +221,89 @@ export default function AssetRegister() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && filteredAssets.length === 0 && (
-        <p>No matching research assets found.</p>
+        <p style={{ color: "#64748b", fontStyle: "italic" }}>
+          No matching research assets found.
+        </p>
       )}
 
       {!loading && !error && filteredAssets.length > 0 && (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "1rem",
-          }}
-        >
-          <thead>
-            <tr
-              style={{
-                backgroundColor: "#f4f4f4",
-                borderBottom: "2px solid #ccc",
-              }}
-            >
-              <th style={{ padding: "0.75rem", textAlign: "left" }}>Title</th>
-              <th style={{ padding: "0.75rem", textAlign: "left" }}>School</th>
-              <th style={{ padding: "0.75rem", textAlign: "left" }}>
-                Discipline
-              </th>
-              <th style={{ padding: "0.75rem", textAlign: "left" }}>Status</th>
-              <th style={{ padding: "0.75rem", textAlign: "left" }}>
-                Date Submitted
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAssets.map((asset) => (
-              <tr key={asset._id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "0.75rem" }}>{asset.title}</td>
-                <td style={{ padding: "0.75rem" }}>{asset.school}</td>
-                <td style={{ padding: "0.75rem" }}>{asset.discipline}</td>
-                <td style={{ padding: "0.75rem" }}>
-                  <span
+        <div style={{ overflowX: "auto" }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              marginTop: "1rem",
+              fontSize: "0.95rem",
+            }}
+          >
+            <thead>
+              <tr
+                style={{
+                  backgroundColor: "#f1f5f9",
+                  borderBottom: "2px solid #cbd5e1",
+                  color: "#0A2540",
+                }}
+              >
+                <th style={{ padding: "0.85rem", textAlign: "left" }}>Title</th>
+                <th style={{ padding: "0.85rem", textAlign: "left" }}>
+                  School
+                </th>
+                <th style={{ padding: "0.85rem", textAlign: "left" }}>
+                  Discipline
+                </th>
+                <th style={{ padding: "0.85rem", textAlign: "left" }}>
+                  Status
+                </th>
+                <th style={{ padding: "0.85rem", textAlign: "left" }}>
+                  Date Submitted
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAssets.map((asset) => (
+                <tr
+                  key={asset._id}
+                  style={{ borderBottom: "1px solid #e2e8f0" }}
+                >
+                  <td
                     style={{
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "4px",
-                      backgroundColor:
-                        asset.status === "completed" ? "#e8f5e9" : "#fff3e0",
-                      color:
-                        asset.status === "completed" ? "#2e7d32" : "#e65100",
-                      fontSize: "0.875rem",
+                      padding: "0.85rem",
+                      color: "#1e293b",
+                      fontWeight: "500",
                     }}
                   >
-                    {asset.status.toUpperCase()}
-                  </span>
-                </td>
-                <td style={{ padding: "0.75rem" }}>
-                  {new Date(asset.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {asset.title}
+                  </td>
+                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                    {asset.school}
+                  </td>
+                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                    {asset.discipline}
+                  </td>
+                  <td style={{ padding: "0.85rem" }}>
+                    <span
+                      style={{
+                        padding: "0.25rem 0.6rem",
+                        borderRadius: "4px",
+                        backgroundColor:
+                          asset.status === "completed" ? "#e8f5e9" : "#fff3e0",
+                        color:
+                          asset.status === "completed" ? "#2e7d32" : "#e65100",
+                        fontSize: "0.8rem",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {asset.status.toUpperCase()}
+                    </span>
+                  </td>
+                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                    {new Date(asset.createdAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
