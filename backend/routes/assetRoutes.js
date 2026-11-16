@@ -1,16 +1,27 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const { createAsset, getAllAssets, importCSV } = require('../controllers/assetController');
-const { protect } = require('../middleware/authMiddleware');
+const multer = require("multer");
+const { protect } = require("../middleware/authMiddleware");
+const {
+  createAsset,
+  getAllAssets,
+  getAssetById,
+  updateAsset,
+  deleteAsset,
+  importCSV,
+  updateAiRating,
+  exportCSV,
+} = require("../controllers/assetController");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Protect routes by inserting the middleware before the controller function
-router.route('/')
-  .post(protect, createAsset)
-  .get(protect, getAllAssets);
-
-router.post('/import', protect, upload.single('file'), importCSV);
+router.get("/", protect, getAllAssets);
+router.get("/export/csv", protect, exportCSV);
+router.get("/:id", protect, getAssetById);
+router.post("/", protect, createAsset);
+router.put("/:id", protect, updateAsset);
+router.delete("/:id", protect, deleteAsset);
+router.post("/import", protect, upload.single("file"), importCSV);
+router.patch("/:id/rating", protect, updateAiRating);
 
 module.exports = router;

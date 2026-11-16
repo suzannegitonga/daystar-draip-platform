@@ -1,0 +1,333 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const API = "http://localhost:5000/api/assets";
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
+
+export default function LeadershipDashboard() {
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const response = await axios.get(API, { headers: authHeaders() });
+        setAssets(response.data.data);
+        setLoading(false);
+      } catch {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await axios.get(`${API}/export/csv`, {
+        headers: authHeaders(),
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `draip-assets-${new Date().toISOString().split("T")[0]}.csv`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Export failed: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  if (loading)
+    return (
+      <p style={{ padding: "2rem", color: "var(--text-secondary)" }}>
+        Loading dashboard...
+      </p>
+    );
+
+  const total = assets.length;
+  const byStatus = assets.reduce((acc, a) => {
+    acc[a.status || "draft"] = (acc[a.status || "draft"] || 0) + 1;
+    return acc;
+  }, {});
+  const bySchool = assets.reduce((acc, a) => {
+    acc[a.school || "Unknown"] = (acc[a.school || "Unknown"] || 0) + 1;
+    return acc;
+  }, {});
+  const bySdg = assets.reduce((acc, a) => {
+    const k = a.sdgTheme || "Unassigned";
+    acc[k] = (acc[k] || 0) + 1;
+    return acc;
+  }, {});
+  const greenAwaiting = assets.filter(
+    (a) => a.aiReadinessRating === "Green" && a.status !== "completed",
+  ).length;
+
+  const cardStyle = {
+    backgroundColor: "var(--bg-primary)",
+    border: "1px solid var(--border-color)",
+    borderRadius: "8px",
+    padding: "1.5rem",
+    minWidth: "200px",
+  };
+  const h3Style = {
+    color: "var(--text-primary)",
+    marginTop: 0,
+    marginBottom: "1rem",
+    fontSize: "1rem",
+  };
+
+  return (
+    <div
+      style={{
+        backgroundColor: "var(--bg-card)",
+        padding: "2.5rem",
+        borderRadius: "8px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "2px solid #C5A059",
+          paddingBottom: "0.75rem",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <h2 style={{ color: "var(--text-primary)", margin: 0 }}>
+          Leadership Dashboard
+        </h2>
+        <button
+          onClick={handleExportCSV}
+          style={{
+            padding: "0.6rem 1.25rem",
+            backgroundColor: "#0A2540",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            fontWeight: "600",
+          }}
+        >
+          📥 Export CSV
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div
+        style={{
+          display: "flex",
+          gap: "1.5rem",
+          flexWrap: "wrap",
+          marginBottom: "2rem",
+        }}
+      >
+        <div style={cardStyle}>
+          <h3 style={h3Style}>Total Assets</h3>
+          <p
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            {total}
+          </p>
+        </div>
+        <div style={cardStyle}>
+          <h3 style={h3Style}>Green Awaiting Action</h3>
+          <p
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              color: "#2e7d32",
+              margin: 0,
+            }}
+          >
+            {greenAwaiting}
+          </p>
+        </div>
+        <div style={cardStyle}>
+          <h3 style={h3Style}>Completed</h3>
+          <p
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              color: "#C5A059",
+              margin: 0,
+            }}
+          >
+            {byStatus.completed || 0}
+          </p>
+        </div>
+      </div>
+
+      {/* Breakdown Tables */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "2rem",
+        }}
+      >
+        <div>
+          <h3
+            style={{
+              color: "var(--text-primary)",
+              borderBottom: "1px solid var(--border-color)",
+              paddingBottom: "0.5rem",
+            }}
+          >
+            By School
+          </h3>
+          <table
+            style={{
+              width: "100%",
+              fontSize: "0.9rem",
+              borderCollapse: "collapse",
+            }}
+          >
+            <tbody>
+              {Object.entries(bySchool)
+                .sort((a, b) => b[1] - a[1])
+                .map(([school, count]) => (
+                  <tr
+                    key={school}
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
+                  >
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {school}
+                    </td>
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        textAlign: "right",
+                        fontWeight: "600",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {count}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3
+            style={{
+              color: "var(--text-primary)",
+              borderBottom: "1px solid var(--border-color)",
+              paddingBottom: "0.5rem",
+            }}
+          >
+            By SDG / Theme
+          </h3>
+          <table
+            style={{
+              width: "100%",
+              fontSize: "0.9rem",
+              borderCollapse: "collapse",
+            }}
+          >
+            <tbody>
+              {Object.entries(bySdg)
+                .sort((a, b) => b[1] - a[1])
+                .map(([sdg, count]) => (
+                  <tr
+                    key={sdg}
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
+                  >
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {sdg}
+                    </td>
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        textAlign: "right",
+                        fontWeight: "600",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {count}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3
+            style={{
+              color: "var(--text-primary)",
+              borderBottom: "1px solid var(--border-color)",
+              paddingBottom: "0.5rem",
+            }}
+          >
+            By Status
+          </h3>
+          <table
+            style={{
+              width: "100%",
+              fontSize: "0.9rem",
+              borderCollapse: "collapse",
+            }}
+          >
+            <tbody>
+              {Object.entries(byStatus)
+                .sort((a, b) => b[1] - a[1])
+                .map(([status, count]) => (
+                  <tr
+                    key={status}
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
+                  >
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {status.replace("_", " ")}
+                    </td>
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        textAlign: "right",
+                        fontWeight: "600",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {count}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
