@@ -3,6 +3,7 @@ import SubmitAsset from "./pages/SubmitAsset";
 import AssetRegister from "./pages/AssetRegister";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
 
 // Simple Route Guard to protect private pages
 function ProtectedRoute({ children }) {
