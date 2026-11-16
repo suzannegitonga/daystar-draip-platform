@@ -136,7 +136,7 @@ const deleteAsset = async (req, res) => {
   }
 };
 
-// @desc    Bulk import assets from CSV
+// @desc    Bulk import assets from CSV with validation (§10.33)
 // @route   POST /api/assets/import
 const importCSV = async (req, res) => {
   if (!req.file) {
@@ -145,23 +145,101 @@ const importCSV = async (req, res) => {
       .json({ status: "error", message: "No CSV file uploaded" });
   }
 
+  const VALID_STATUSES = [
+    "draft",
+    "submitted",
+    "under_review",
+    "completed",
+    "archived",
+  ];
+  const VALID_ASSET_TYPES = [
+    "Thesis",
+    "Dataset",
+    "Paper",
+    "Prototype",
+    "Algorithm",
+    "Innovation",
+  ];
+  const REQUIRED_FIELDS = ["title", "school", "discipline"];
+
   const results = [];
+  const errors = [];
   const bufferStream = new stream.PassThrough();
   bufferStream.end(req.file.buffer);
 
   bufferStream
     .pipe(csv())
     .on("data", (row) => {
+      const rowNum = results.length + errors.length + 1;
       const get = (...keys) => {
-        for (const k of keys)
-          if (row[k] !== undefined && row[k] !== "") return row[k];
+        for (const k of keys) {
+          if (row[k] !== undefined && String(row[k]).trim() !== "")
+            return String(row[k]).trim();
+        }
         return undefined;
       };
+
+      const title = get("Title", "title");
+      const school = get("School", "school");
+      const discipline = get("Discipline", "discipline");
+
+      // Required field validation
+      const missing = [];
+      if (!title) missing.push("title");
+      if (!school) missing.push("school");
+      if (!discipline) missing.push("discipline");
+      if (missing.length > 0) {
+        errors.push({
+          row: rowNum,
+          reason: `Missing required fields: ${missing.join(", ")}`,
+        });
+        return;
+      }
+
+      // Asset type validation
+      const rawType = get("AssetType", "assetType", "Type", "type") || "Thesis";
+      const assetType = VALID_ASSET_TYPES.find(
+        (t) => t.toLowerCase() === rawType.toLowerCase(),
+      );
+      if (!assetType) {
+        errors.push({
+          row: rowNum,
+          title,
+          reason: `Invalid assetType: "${rawType}". Must be one of: ${VALID_ASSET_TYPES.join(", ")}`,
+        });
+        return;
+      }
+
+      // Status validation
+      const rawStatus = get("Status", "status") || "draft";
+      const status = VALID_STATUSES.find(
+        (s) => s.toLowerCase() === rawStatus.toLowerCase().replace(/\s+/g, "_"),
+      );
+      if (!status) {
+        errors.push({
+          row: rowNum,
+          title,
+          reason: `Invalid status: "${rawStatus}". Must be one of: ${VALID_STATUSES.join(", ")}`,
+        });
+        return;
+      }
+
+      // Keywords parsing
+      const rawKeywords = get("Keywords", "keywords");
+      const keywords = rawKeywords
+        ? rawKeywords
+            .split(",")
+            .map((k) => k.trim())
+            .filter(Boolean)
+        : [];
+
       const entry = {
-        title: get("Title", "title"),
-        school: get("School", "school"),
-        discipline: get("Discipline", "discipline"),
-        assetType: get("AssetType", "assetType", "Type", "type") || "Thesis",
+        title,
+        school,
+        discipline,
+        assetType,
+        status,
+        keywords,
         researchQuestion: get("ResearchQuestion", "researchQuestion"),
         datasetAvailability: get("DatasetAvailability", "datasetAvailability"),
         sampleSize: get("SampleSize", "sampleSize"),
@@ -178,28 +256,50 @@ const importCSV = async (req, res) => {
           "publicationPotential",
         ),
         sdgTheme: get("SdgTheme", "sdgTheme", "SDG"),
-        keywords: get("Keywords", "keywords")
-          ? String(get("Keywords", "keywords"))
-              .split(",")
-              .map((k) => k.trim())
-          : [],
-        status: get("Status", "status")
-          ? String(get("Status", "status")).toLowerCase()
-          : "draft",
         owner: req.user._id,
       };
-      // Drop undefined keys
-      Object.keys(entry).forEach(
-        (k) => entry[k] === undefined && delete entry[k],
-      );
+
       results.push(entry);
     })
     .on("end", async () => {
       try {
-        const inserted = await ResearchAsset.insertMany(results);
-        res
-          .status(201)
-          .json({ status: "success", count: inserted.length, data: inserted });
+        // Duplicate detection by title + school
+        const existingAssets = await ResearchAsset.find({
+          title: { $in: results.map((r) => r.title) },
+          school: { $in: results.map((r) => r.school) },
+        }).select("title school");
+        const existingSet = new Set(
+          existingAssets.map((a) => `${a.title}|||${a.school}`),
+        );
+
+        const toInsert = [];
+        results.forEach((entry, idx) => {
+          const key = `${entry.title}|||${entry.school}`;
+          if (existingSet.has(key)) {
+            errors.push({
+              row: idx + 1,
+              title: entry.title,
+              reason:
+                "Duplicate: asset with same title and school already exists",
+            });
+          } else {
+            toInsert.push(entry);
+            existingSet.add(key); // prevent duplicates within the same CSV
+          }
+        });
+
+        let insertedCount = 0;
+        if (toInsert.length > 0) {
+          const inserted = await ResearchAsset.insertMany(toInsert);
+          insertedCount = inserted.length;
+        }
+
+        res.status(201).json({
+          status: "success",
+          imported: insertedCount,
+          skipped: errors.length,
+          errors: errors.length > 0 ? errors : undefined,
+        });
       } catch (error) {
         res
           .status(500)

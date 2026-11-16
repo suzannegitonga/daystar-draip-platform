@@ -107,7 +107,17 @@ export default function AssetRegister() {
       const response = await axios.post(`${API}/import`, formData, {
         headers: { "Content-Type": "multipart/form-data", ...authHeaders() },
       });
-      setUploadMessage(`Success! Imported ${response.data.count} assets.`);
+      const { imported, skipped, errors } = response.data;
+      let msg = `Imported ${imported} asset${imported !== 1 ? "s" : ""}.`;
+      if (skipped > 0) {
+        msg += ` Skipped ${skipped} row${skipped !== 1 ? "s" : ""}.`;
+        if (errors && errors.length > 0) {
+          msg +=
+            "\n\nErrors:\n" +
+            errors.map((e) => `Row ${e.row}: ${e.reason}`).join("\n");
+        }
+      }
+      setUploadMessage(msg);
       setFile(null);
       fetchAssets();
     } catch (err) {
@@ -264,9 +274,14 @@ export default function AssetRegister() {
             style={{
               marginTop: "0.75rem",
               marginBottom: 0,
-              color: uploadMessage.includes("failed") ? "#d32f2f" : "#2e7d32",
+              color:
+                uploadMessage.includes("Skipped") ||
+                uploadMessage.includes("failed")
+                  ? "#e65100"
+                  : "#2e7d32",
               fontWeight: "600",
               fontSize: "0.9rem",
+              whiteSpace: "pre-line",
             }}
           >
             {uploadMessage}
