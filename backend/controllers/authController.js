@@ -1,17 +1,24 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, school } = req.body;
+
+    // Only student/lecturer roles allowed at self-registration
+    const safeRole = ["researcher", "lecturer"].includes(role)
+      ? role
+      : "researcher";
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ status: 'error', message: 'User already exists' });
+      return res
+        .status(400)
+        .json({ status: "error", message: "User already exists" });
     }
 
     // Hash the password
@@ -23,20 +30,22 @@ const registerUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || 'researcher'
+      role: safeRole,
+      school,
     });
 
     res.status(201).json({
-      status: 'success',
+      status: "success",
       data: {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+        school: user.school,
+      },
     });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
   }
 };
 
@@ -48,34 +57,34 @@ const loginUser = async (req, res) => {
 
     // Check for user email
     const user = await User.findOne({ email });
-    
+
     // Compare provided password with hashed password in database
     if (user && (await bcrypt.compare(password, user.password))) {
       res.status(200).json({
-        status: 'success',
+        status: "success",
         data: {
           _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
-          token: generateToken(user._id)
-        }
+          school: user.school,
+          token: generateToken(user._id),
+        },
       });
     } else {
-      res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+      res.status(401).json({ status: "error", message: "Invalid credentials" });
     }
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
   }
 };
 
 // Generate JWT
 const generateToken = (id) => {
-  // We will define JWT_SECRET in the .env file next
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
 };

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,12 +23,15 @@ export default function Login() {
       );
 
       if (response.data.status === "success") {
-        localStorage.setItem("token", response.data.data.token);
+        const { token, ...user } = response.data.data;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
         setMessage("Login successful! Redirecting...");
-
         setTimeout(() => {
-          window.location.href = "/register";
-        }, 1000);
+          window.location.href = "/";
+        }, 800);
       }
     } catch (error) {
       setMessage(
@@ -91,7 +95,6 @@ export default function Login() {
         }}
       >
         <div style={{ width: "100%", maxWidth: "400px" }}>
-          {/* Institutional Branding Header */}
           <div style={{ textAlign: "center", marginBottom: "2rem" }}>
             <h2
               style={{
@@ -103,7 +106,7 @@ export default function Login() {
               Welcome back
             </h2>
             <p style={{ color: "#666", fontSize: "0.95rem", margin: 0 }}>
-              Log in to DRAIP Staff Portal
+              Log in to DRAIP — Students & Lecturers Portal
             </p>
           </div>
 
@@ -170,29 +173,49 @@ export default function Login() {
               >
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                style={{
-                  width: "100%",
-                  padding: "0.75rem 1rem",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: "4px",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem 3rem 0.75rem 1rem",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "4px",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "0.75rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#64748b",
+                    fontSize: "0.8rem",
+                    fontWeight: "600",
+                  }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
               style={{
                 padding: "0.85rem",
-                backgroundColor: "#00b4d8",
+                backgroundColor: "#0A2540",
                 color: "white",
                 border: "none",
                 borderRadius: "4px",
@@ -200,14 +223,25 @@ export default function Login() {
                 fontSize: "1rem",
                 fontWeight: "600",
                 marginTop: "0.5rem",
-                transition: "background-color 0.2s",
               }}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#0096c7")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#00b4d8")}
             >
               Log in
             </button>
           </form>
+
+          <p
+            style={{
+              textAlign: "center",
+              marginTop: "1.5rem",
+              fontSize: "0.9rem",
+              color: "#666",
+            }}
+          >
+            New student or lecturer?{" "}
+            <Link to="/signup" style={{ color: "#C5A059", fontWeight: "600" }}>
+              Create an account
+            </Link>
+          </p>
         </div>
       </div>
     </div>

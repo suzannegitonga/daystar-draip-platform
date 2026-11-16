@@ -1,11 +1,48 @@
 import { Link, useNavigate, Outlet } from "react-router-dom";
 
+const NAV_ITEMS = [
+  {
+    to: "/",
+    label: "🏠 Dashboard",
+    roles: ["researcher", "lecturer", "reviewer", "admin"],
+  },
+  {
+    to: "/submit",
+    label: "➕ Submit Asset",
+    roles: ["researcher", "lecturer", "reviewer", "admin"],
+  },
+  {
+    to: "/register",
+    label: "📋 Asset Register",
+    roles: ["researcher", "lecturer", "reviewer", "admin"],
+  },
+  {
+    to: "/my-assets",
+    label: "📂 My Submissions",
+    roles: ["researcher", "lecturer"],
+  },
+  { to: "/review", label: "✅ Review Queue", roles: ["reviewer", "admin"] },
+  { to: "/leadership", label: "📊 Leadership", roles: ["reviewer", "admin"] },
+];
+
 export default function Layout() {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const visibleNav = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
+  };
+
+  const linkStyle = {
+    display: "block",
+    padding: "0.75rem 1.5rem",
+    color: "#e2e8f0",
+    textDecoration: "none",
+    fontSize: "0.9rem",
+    borderLeft: "3px solid transparent",
   };
 
   return (
@@ -33,7 +70,6 @@ export default function Layout() {
         <div
           style={{
             padding: "1.5rem 1rem",
-            backgroundColor: "#0A2540",
             borderBottom: "1px solid rgba(255,255,255,0.1)",
             textAlign: "center",
           }}
@@ -42,7 +78,7 @@ export default function Layout() {
             style={{
               margin: 0,
               fontSize: "1.2rem",
-              color: "#00b4d8",
+              color: "#C5A059",
               letterSpacing: "1px",
             }}
           >
@@ -51,7 +87,7 @@ export default function Layout() {
           <span
             style={{
               fontSize: "0.75rem",
-              color: "#C5A059",
+              color: "#94a3b8",
               letterSpacing: "0.5px",
               textTransform: "uppercase",
             }}
@@ -60,7 +96,7 @@ export default function Layout() {
           </span>
         </div>
 
-        {/* Navigation Links Group */}
+        {/* Navigation Links */}
         <div style={{ padding: "1rem 0", flex: 1, overflowY: "auto" }}>
           <div
             style={{
@@ -73,50 +109,23 @@ export default function Layout() {
           >
             Navigation
           </div>
-
-          <Link
-            to="/register"
-            style={{
-              display: "block",
-              padding: "0.75rem 1.5rem",
-              color: "#e2e8f0",
-              textDecoration: "none",
-              fontSize: "0.9rem",
-              borderLeft: "3px solid transparent",
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = "rgba(255,255,255,0.05)";
-              e.target.style.borderLeftColor = "#00b4d8";
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = "transparent";
-              e.target.style.borderLeftColor = "transparent";
-            }}
-          >
-            📋 Asset Register
-          </Link>
-
-          <Link
-            to="/"
-            style={{
-              display: "block",
-              padding: "0.75rem 1.5rem",
-              color: "#e2e8f0",
-              textDecoration: "none",
-              fontSize: "0.9rem",
-              borderLeft: "3px solid transparent",
-            }}
-            onMouseOver={(e) => {
-              e.target.style.backgroundColor = "rgba(255,255,255,0.05)";
-              e.target.style.borderLeftColor = "#00b4d8";
-            }}
-            onMouseOut={(e) => {
-              e.target.style.backgroundColor = "transparent";
-              e.target.style.borderLeftColor = "transparent";
-            }}
-          >
-            ➕ Submit Asset
-          </Link>
+          {visibleNav.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              style={linkStyle}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = "rgba(255,255,255,0.05)";
+                e.target.style.borderLeftColor = "#C5A059";
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = "transparent";
+                e.target.style.borderLeftColor = "transparent";
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
 
         {/* User Session Footer */}
@@ -159,7 +168,7 @@ export default function Layout() {
         <header
           style={{
             height: "60px",
-            backgroundColor: "#00b4d8",
+            backgroundColor: "#0A2540",
             display: "flex",
             justifyContent: "flex-end",
             alignItems: "center",
@@ -182,17 +191,21 @@ export default function Layout() {
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                backgroundColor: "#0A2540",
+                backgroundColor: "#C5A059",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                color: "#C5A059",
+                color: "#0A2540",
                 fontSize: "0.85rem",
+                fontWeight: "700",
               }}
             >
-              DR
+              {(user.name || "U").charAt(0).toUpperCase()}
             </div>
-            <span>DRICE ADMIN</span>
+            <span>
+              {user.name || "User"} —{" "}
+              {user.role === "researcher" ? "Student" : user.role || "Guest"}
+            </span>
           </div>
         </header>
 
