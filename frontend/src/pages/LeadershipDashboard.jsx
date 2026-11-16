@@ -22,7 +22,12 @@ export default function LeadershipDashboard() {
     fetchAll();
   }, []);
 
-  if (loading) return <p style={{ padding: "2rem" }}>Loading dashboard...</p>;
+  if (loading)
+    return (
+      <p style={{ padding: "2rem", color: "var(--text-secondary)" }}>
+        Loading dashboard...
+      </p>
+    );
 
   const total = assets.length;
   const byStatus = assets.reduce((acc, a) => {
@@ -43,14 +48,14 @@ export default function LeadershipDashboard() {
   ).length;
 
   const cardStyle = {
-    backgroundColor: "#f8fafc",
-    border: "1px solid #e2e8f0",
+    backgroundColor: "var(--bg-primary)",
+    border: "1px solid var(--border-color)",
     borderRadius: "8px",
     padding: "1.5rem",
     minWidth: "200px",
   };
   const h3Style = {
-    color: "#0A2540",
+    color: "var(--text-primary)",
     marginTop: 0,
     marginBottom: "1rem",
     fontSize: "1rem",
@@ -59,7 +64,7 @@ export default function LeadershipDashboard() {
   return (
     <div
       style={{
-        backgroundColor: "#fff",
+        backgroundColor: "var(--bg-card)",
         padding: "2.5rem",
         borderRadius: "8px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
@@ -67,7 +72,7 @@ export default function LeadershipDashboard() {
     >
       <h2
         style={{
-          color: "#0A2540",
+          color: "var(--text-primary)",
           marginTop: 0,
           borderBottom: "2px solid #C5A059",
           paddingBottom: "0.75rem",
@@ -91,7 +96,7 @@ export default function LeadershipDashboard() {
             style={{
               fontSize: "2rem",
               fontWeight: "700",
-              color: "#0A2540",
+              color: "var(--text-primary)",
               margin: 0,
             }}
           >
@@ -137,8 +142,8 @@ export default function LeadershipDashboard() {
         <div>
           <h3
             style={{
-              color: "#0A2540",
-              borderBottom: "1px solid #e2e8f0",
+              color: "var(--text-primary)",
+              borderBottom: "1px solid var(--border-color)",
               paddingBottom: "0.5rem",
             }}
           >
@@ -157,14 +162,22 @@ export default function LeadershipDashboard() {
                 .map(([school, count]) => (
                   <tr
                     key={school}
-                    style={{ borderBottom: "1px solid #f1f5f9" }}
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
                   >
-                    <td style={{ padding: "0.5rem 0" }}>{school}</td>
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {school}
+                    </td>
                     <td
                       style={{
                         padding: "0.5rem 0",
                         textAlign: "right",
                         fontWeight: "600",
+                        color: "var(--text-primary)",
                       }}
                     >
                       {count}
@@ -178,8 +191,8 @@ export default function LeadershipDashboard() {
         <div>
           <h3
             style={{
-              color: "#0A2540",
-              borderBottom: "1px solid #e2e8f0",
+              color: "var(--text-primary)",
+              borderBottom: "1px solid var(--border-color)",
               paddingBottom: "0.5rem",
             }}
           >
@@ -196,13 +209,24 @@ export default function LeadershipDashboard() {
               {Object.entries(bySdg)
                 .sort((a, b) => b[1] - a[1])
                 .map(([sdg, count]) => (
-                  <tr key={sdg} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "0.5rem 0" }}>{sdg}</td>
+                  <tr
+                    key={sdg}
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
+                  >
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {sdg}
+                    </td>
                     <td
                       style={{
                         padding: "0.5rem 0",
                         textAlign: "right",
                         fontWeight: "600",
+                        color: "var(--text-primary)",
                       }}
                     >
                       {count}
@@ -216,8 +240,8 @@ export default function LeadershipDashboard() {
         <div>
           <h3
             style={{
-              color: "#0A2540",
-              borderBottom: "1px solid #e2e8f0",
+              color: "var(--text-primary)",
+              borderBottom: "1px solid var(--border-color)",
               paddingBottom: "0.5rem",
             }}
           >
@@ -236,9 +260,14 @@ export default function LeadershipDashboard() {
                 .map(([status, count]) => (
                   <tr
                     key={status}
-                    style={{ borderBottom: "1px solid #f1f5f9" }}
+                    style={{ borderBottom: "1px solid var(--border-color)" }}
                   >
-                    <td style={{ padding: "0.5rem 0" }}>
+                    <td
+                      style={{
+                        padding: "0.5rem 0",
+                        color: "var(--text-primary)",
+                      }}
+                    >
                       {status.replace("_", " ")}
                     </td>
                     <td
@@ -246,6 +275,7 @@ export default function LeadershipDashboard() {
                         padding: "0.5rem 0",
                         textAlign: "right",
                         fontWeight: "600",
+                        color: "var(--text-primary)",
                       }}
                     >
                       {count}

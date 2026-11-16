@@ -301,14 +301,54 @@ const importCSV = async (req, res) => {
           errors: errors.length > 0 ? errors : undefined,
         });
       } catch (error) {
-        res
-          .status(500)
-          .json({
-            status: "error",
-            message: "Database insertion failed: " + error.message,
-          });
+        res.status(500).json({
+          status: "error",
+          message: "Database insertion failed: " + error.message,
+        });
       }
     });
+};
+// @desc    Update AI readiness rating (reviewer/admin only)
+// @route   PATCH /api/assets/:id/rating
+const updateAiRating = async (req, res) => {
+  try {
+    const { aiReadinessRating } = req.body;
+    if (!["Green", "Amber", "Red"].includes(aiReadinessRating)) {
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "Rating must be Green, Amber, or Red",
+        });
+    }
+
+    const isPrivileged =
+      req.user.role === "admin" || req.user.role === "reviewer";
+    if (!isPrivileged) {
+      return res
+        .status(403)
+        .json({
+          status: "error",
+          message: "Only reviewers and admins can set AI readiness rating",
+        });
+    }
+
+    const asset = await ResearchAsset.findByIdAndUpdate(
+      req.params.id,
+      { aiReadinessRating },
+      { new: true, runValidators: true },
+    );
+
+    if (!asset) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Asset not found" });
+    }
+
+    res.status(200).json({ status: "success", data: asset });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
 };
 
 module.exports = {
@@ -318,4 +358,5 @@ module.exports = {
   updateAsset,
   deleteAsset,
   importCSV,
+  updateAiRating,
 };

@@ -1,61 +1,71 @@
 import { Link } from "react-router-dom";
 
-const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-const CARDS = [
-  {
-    to: "/submit",
-    title: "Submit New Asset",
-    desc: "Register a thesis, dataset, paper, prototype, algorithm, or innovation.",
-    roles: ["researcher", "lecturer", "reviewer", "admin"],
-  },
-  {
-    to: "/register",
-    title: "Asset Register",
-    desc: "Browse, search, filter, edit, and bulk-import research assets.",
-    roles: ["researcher", "lecturer", "reviewer", "admin"],
-  },
-  {
-    to: "/my-assets",
-    title: "My Submissions",
-    desc: "Track the status of your own submitted assets.",
-    roles: ["researcher", "lecturer"],
-  },
-  {
-    to: "/review",
-    title: "Review Queue",
-    desc: "Confirm, edit, or reject AI-suggested pathways for submitted assets.",
-    roles: ["reviewer", "admin"],
-  },
-  {
-    to: "/leadership",
-    title: "Leadership Dashboard",
-    desc: "Summary by school, SDG, pathway, and Green-rated assets awaiting action.",
-    roles: ["reviewer", "admin"],
-  },
-];
-
 export default function Dashboard() {
-  const visibleCards = CARDS.filter((c) => c.roles.includes(user.role));
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const role = user.role;
+
+  const cards = [
+    {
+      to: "/submit",
+      label: "➕ Submit New Asset",
+      desc: "Create a new research asset entry",
+      roles: ["researcher", "lecturer", "reviewer", "admin"],
+    },
+    {
+      to: "/register",
+      label: "📋 Asset Register",
+      desc: "Browse and search all registered assets",
+      roles: ["researcher", "lecturer", "reviewer", "admin"],
+    },
+    {
+      to: "/my-assets",
+      label: "📂 My Submissions",
+      desc: "Track your submitted assets and their status",
+      roles: ["researcher", "lecturer"],
+    },
+    {
+      to: "/review",
+      label: "✅ Review Queue",
+      desc: "Review and approve pending submissions",
+      roles: ["reviewer", "admin"],
+    },
+    {
+      to: "/leadership",
+      label: "📊 Leadership Dashboard",
+      desc: "Institutional overview and KPIs",
+      roles: ["reviewer", "admin"],
+    },
+  ];
+
+  const visibleCards = cards.filter((c) => c.roles.includes(role));
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h2 style={{ color: "#0A2540", marginBottom: "0.25rem" }}>
-        DRAIP Dashboard
+    <div
+      style={{
+        backgroundColor: "var(--bg-card)",
+        padding: "2.5rem",
+        borderRadius: "8px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+      }}
+    >
+      <h2
+        style={{
+          color: "var(--text-primary)",
+          marginTop: 0,
+          borderBottom: "2px solid #C5A059",
+          paddingBottom: "0.75rem",
+        }}
+      >
+        Welcome, {user.name || "User"}
       </h2>
-      <p style={{ color: "#64748b", marginTop: 0, marginBottom: "2rem" }}>
-        Welcome{user.name ? `, ${user.name}` : ""} —{" "}
-        <span style={{ color: "#C5A059", fontWeight: "600" }}>
-          {user.role === "researcher"
-            ? "Student Researcher"
-            : user.role || "Guest"}
-        </span>
+      <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>
+        Select an action below to get started.
       </p>
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
           gap: "1.5rem",
         }}
       >
@@ -64,21 +74,38 @@ export default function Dashboard() {
             key={card.to}
             to={card.to}
             style={{
-              backgroundColor: "#0A2540",
-              padding: "1.5rem",
-              borderRadius: "8px",
               textDecoration: "none",
-              color: "#fff",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-              borderTop: "3px solid #C5A059",
+              backgroundColor: "var(--bg-primary)",
+              border: "1px solid var(--border-color)",
+              borderRadius: "8px",
+              padding: "1.5rem",
+              transition: "transform 0.15s, box-shadow 0.15s",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "none";
             }}
           >
             <h3
-              style={{ color: "#C5A059", marginTop: 0, marginBottom: "0.5rem" }}
+              style={{
+                margin: "0 0 0.5rem 0",
+                color: "var(--text-primary)",
+                fontSize: "1.1rem",
+              }}
             >
-              {card.title}
+              {card.label}
             </h3>
-            <p style={{ margin: 0, fontSize: "0.9rem", color: "#e2e8f0" }}>
+            <p
+              style={{
+                margin: 0,
+                color: "var(--text-secondary)",
+                fontSize: "0.9rem",
+              }}
+            >
               {card.desc}
             </p>
           </Link>

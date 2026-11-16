@@ -32,7 +32,7 @@ export default function MyAssets() {
   return (
     <div
       style={{
-        backgroundColor: "#fff",
+        backgroundColor: "var(--bg-card)",
         padding: "2.5rem",
         borderRadius: "8px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
@@ -40,7 +40,7 @@ export default function MyAssets() {
     >
       <h2
         style={{
-          color: "#0A2540",
+          color: "var(--text-primary)",
           marginTop: 0,
           borderBottom: "2px solid #C5A059",
           paddingBottom: "0.75rem",
@@ -49,11 +49,11 @@ export default function MyAssets() {
         My Submissions
       </h2>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p style={{ color: "var(--text-secondary)" }}>Loading...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && assets.length === 0 && (
-        <p style={{ color: "#64748b", fontStyle: "italic" }}>
+        <p style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
           You haven't submitted any assets yet.{" "}
           <Link to="/submit" style={{ color: "#C5A059", fontWeight: "600" }}>
             Submit your first asset
@@ -72,9 +72,9 @@ export default function MyAssets() {
           <thead>
             <tr
               style={{
-                backgroundColor: "#f1f5f9",
-                color: "#0A2540",
-                borderBottom: "2px solid #cbd5e1",
+                backgroundColor: "var(--bg-primary)",
+                color: "var(--text-primary)",
+                borderBottom: "2px solid var(--border-color)",
               }}
             >
               {["Title", "Type", "SDG/Theme", "Status", "Submitted"].map(
@@ -88,20 +88,27 @@ export default function MyAssets() {
           </thead>
           <tbody>
             {assets.map((asset) => (
-              <tr key={asset._id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+              <tr
+                key={asset._id}
+                style={{ borderBottom: "1px solid var(--border-color)" }}
+              >
                 <td
                   style={{
                     padding: "0.85rem",
                     fontWeight: "500",
-                    color: "#1e293b",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {asset.title}
                 </td>
-                <td style={{ padding: "0.85rem", color: "#475569" }}>
+                <td
+                  style={{ padding: "0.85rem", color: "var(--text-secondary)" }}
+                >
                   {asset.assetType || "—"}
                 </td>
-                <td style={{ padding: "0.85rem", color: "#475569" }}>
+                <td
+                  style={{ padding: "0.85rem", color: "var(--text-secondary)" }}
+                >
                   {asset.sdgTheme || "—"}
                 </td>
                 <td style={{ padding: "0.85rem" }}>
@@ -120,7 +127,9 @@ export default function MyAssets() {
                     {(asset.status || "draft").replace("_", " ").toUpperCase()}
                   </span>
                 </td>
-                <td style={{ padding: "0.85rem", color: "#475569" }}>
+                <td
+                  style={{ padding: "0.85rem", color: "var(--text-secondary)" }}
+                >
                   {new Date(asset.createdAt).toLocaleDateString()}
                 </td>
               </tr>

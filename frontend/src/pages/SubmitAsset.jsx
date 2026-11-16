@@ -1,141 +1,83 @@
 import { useState } from "react";
 import axios from "axios";
 
-const EMPTY_FORM = {
-  title: "",
-  school: "",
-  discipline: "",
-  assetType: "Thesis",
-  researchQuestion: "",
-  datasetAvailability: "",
-  sampleSize: "",
-  methodology: "",
-  findings: "",
-  novelty: "",
-  potentialUsers: "",
-  industryRelevance: "",
-  policyRelevance: "",
-  commercialPotential: "",
-  ipPotential: "",
-  publicationPotential: "",
-  sdgTheme: "",
-  keywords: "",
-  status: "draft",
-};
+const API = "http://localhost:5000/api/assets";
 
-const STEPS = [
+const FORM_FIELDS = [
+  { name: "title", label: "Research Title", required: true },
+  { name: "school", label: "School", required: true },
+  { name: "discipline", label: "Discipline", required: true },
   {
-    name: "Identification",
-    fields: [
-      { name: "title", label: "Title", type: "text", required: true },
-      { name: "school", label: "School", type: "text", required: true },
-      { name: "discipline", label: "Discipline", type: "text", required: true },
-      {
-        name: "assetType",
-        label: "Asset Type",
-        type: "select",
-        options: [
-          "Thesis",
-          "Dataset",
-          "Paper",
-          "Prototype",
-          "Algorithm",
-          "Innovation",
-        ],
-        required: true,
-      },
+    name: "assetType",
+    label: "Asset Type",
+    type: "select",
+    options: [
+      "Thesis",
+      "Dataset",
+      "Paper",
+      "Prototype",
+      "Algorithm",
+      "Innovation",
     ],
+    required: true,
   },
+  { name: "researchQuestion", label: "Research Question", type: "textarea" },
+  { name: "datasetAvailability", label: "Dataset Availability" },
+  { name: "sampleSize", label: "Sample Size" },
+  { name: "methodology", label: "Methodology", type: "textarea" },
+  { name: "findings", label: "Key Findings", type: "textarea" },
+  { name: "novelty", label: "Novelty / Contribution", type: "textarea" },
   {
-    name: "Research Substance",
-    fields: [
-      {
-        name: "researchQuestion",
-        label: "Research Question",
-        type: "textarea",
-      },
-      {
-        name: "datasetAvailability",
-        label: "Dataset Availability",
-        type: "text",
-      },
-      { name: "sampleSize", label: "Sample Size", type: "text" },
-      { name: "methodology", label: "Methodology", type: "textarea" },
-      { name: "findings", label: "Findings", type: "textarea" },
-      { name: "novelty", label: "Novelty", type: "textarea" },
-    ],
+    name: "potentialUsers",
+    label: "Potential Users / Beneficiaries",
+    type: "textarea",
   },
+  { name: "industryRelevance", label: "Industry Relevance", type: "textarea" },
+  { name: "policyRelevance", label: "Policy Relevance", type: "textarea" },
   {
-    name: "Application Potential",
-    fields: [
-      { name: "potentialUsers", label: "Potential Users", type: "textarea" },
-      {
-        name: "industryRelevance",
-        label: "Industry Relevance",
-        type: "textarea",
-      },
-      { name: "policyRelevance", label: "Policy Relevance", type: "textarea" },
-      {
-        name: "commercialPotential",
-        label: "Commercial Potential",
-        type: "textarea",
-      },
-      { name: "ipPotential", label: "IP Potential", type: "textarea" },
-      {
-        name: "publicationPotential",
-        label: "Publication Potential",
-        type: "textarea",
-      },
-    ],
+    name: "commercialPotential",
+    label: "Commercial Potential",
+    type: "textarea",
   },
+  { name: "ipPotential", label: "IP Potential", type: "textarea" },
   {
-    name: "Classification & Status",
-    fields: [
-      { name: "sdgTheme", label: "SDG / Theme", type: "text" },
-      { name: "keywords", label: "Keywords (comma-separated)", type: "text" },
-      {
-        name: "status",
-        label: "Status",
-        type: "select",
-        options: [
-          { value: "draft", label: "Draft" },
-          { value: "submitted", label: "Submitted" },
-          { value: "under_review", label: "Under Review" },
-          { value: "completed", label: "Completed" },
-          { value: "archived", label: "Archived" },
-        ],
-      },
-    ],
+    name: "publicationPotential",
+    label: "Publication Potential",
+    type: "textarea",
   },
+  { name: "sdgTheme", label: "SDG / Theme Alignment" },
+  { name: "keywords", label: "Keywords (comma-separated)" },
 ];
 
 const inputStyle = {
   width: "100%",
-  padding: "0.75rem",
-  border: "1px solid #cbd5e1",
+  padding: "0.7rem",
+  border: "1px solid var(--border-color)",
   borderRadius: "4px",
   boxSizing: "border-box",
+  backgroundColor: "var(--bg-card)",
+  color: "var(--text-primary)",
 };
 const labelStyle = {
   display: "block",
-  marginBottom: "0.5rem",
+  marginBottom: "0.4rem",
   fontWeight: "600",
-  color: "#0A2540",
+  color: "var(--text-primary)",
+  fontSize: "0.9rem",
 };
 
 export default function SubmitAsset() {
-  const [formData, setFormData] = useState(EMPTY_FORM);
-  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState({});
   const [message, setMessage] = useState("");
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     try {
-      const token = localStorage.getItem("token");
       const payload = {
         ...formData,
         keywords: formData.keywords
@@ -145,58 +87,47 @@ export default function SubmitAsset() {
               .filter(Boolean)
           : [],
       };
-      const response = await axios.post(
-        "http://localhost:5000/api/assets",
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (response.data.status === "success") {
-        setMessage("Asset submitted successfully!");
-        setFormData(EMPTY_FORM);
-        setStep(0);
-      }
-    } catch (error) {
+      await axios.post(API, payload, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setMessage("Asset submitted successfully!");
+      setFormData({});
+    } catch (err) {
       setMessage(
-        "Error submitting asset: " +
-          (error.response?.data?.message || error.message),
+        "Submission failed: " + (err.response?.data?.message || err.message),
       );
     }
   };
 
-  const current = STEPS[step];
-  const isLast = step === STEPS.length - 1;
-
   return (
     <div
       style={{
-        maxWidth: "800px",
-        margin: "0 auto",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--bg-card)",
         padding: "2.5rem",
         borderRadius: "8px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
       }}
     >
-      <h2 style={{ color: "#0A2540", marginTop: 0, marginBottom: "0.5rem" }}>
-        Submit Research Asset
-      </h2>
-      <p
-        style={{ color: "#C5A059", fontWeight: "600", marginBottom: "1.5rem" }}
+      <h2
+        style={{
+          color: "var(--text-primary)",
+          marginTop: 0,
+          borderBottom: "2px solid #C5A059",
+          paddingBottom: "0.75rem",
+        }}
       >
-        Step {step + 1} of {STEPS.length}: {current.name}
-      </p>
+        Submit New Research Asset
+      </h2>
 
       {message && (
         <div
           style={{
-            padding: "1rem",
+            padding: "0.75rem 1rem",
             marginBottom: "1.5rem",
-            backgroundColor: message.includes("Error") ? "#ffebee" : "#e8f5e9",
-            color: message.includes("Error") ? "#c62828" : "#2e7d32",
+            backgroundColor: message.includes("failed") ? "#ffebee" : "#e8f5e9",
+            color: message.includes("failed") ? "#c62828" : "#2e7d32",
             borderRadius: "4px",
-            fontWeight: "500",
+            fontSize: "0.9rem",
           }}
         >
           {message}
@@ -205,111 +136,75 @@ export default function SubmitAsset() {
 
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "1.25rem",
+        }}
       >
-        {current.fields.map((f) => (
-          <div key={f.name}>
+        {FORM_FIELDS.map((field) => (
+          <div
+            key={field.name}
+            style={{
+              gridColumn: field.type === "textarea" ? "1 / -1" : undefined,
+            }}
+          >
             <label style={labelStyle}>
-              {f.label}
-              {f.required ? " *" : ""}
+              {field.label}
+              {field.required ? " *" : ""}
             </label>
-            {f.type === "select" ? (
+            {field.type === "select" ? (
               <select
-                name={f.name}
-                value={formData[f.name]}
+                name={field.name}
+                value={formData[field.name] || ""}
                 onChange={handleChange}
-                required={f.required}
-                style={{ ...inputStyle, backgroundColor: "#fff" }}
+                required={field.required}
+                style={{ ...inputStyle, backgroundColor: "var(--bg-card)" }}
               >
-                {f.options.map((o) =>
-                  typeof o === "string" ? (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
-                  ) : (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ),
-                )}
+                <option value="">Select...</option>
+                {field.options.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
               </select>
-            ) : f.type === "textarea" ? (
+            ) : field.type === "textarea" ? (
               <textarea
-                name={f.name}
-                value={formData[f.name]}
-                onChange={handleChange}
+                name={field.name}
                 rows={3}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
                 style={inputStyle}
               />
             ) : (
               <input
                 type="text"
-                name={f.name}
-                value={formData[f.name]}
+                name={field.name}
+                required={field.required}
+                value={formData[field.name] || ""}
                 onChange={handleChange}
-                required={f.required}
                 style={inputStyle}
               />
             )}
           </div>
         ))}
 
-        <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={() => setStep(step - 1)}
-              style={{
-                flex: 1,
-                padding: "0.85rem",
-                backgroundColor: "#e2e8f0",
-                color: "#0A2540",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "1rem",
-                fontWeight: "600",
-              }}
-            >
-              Back
-            </button>
-          )}
-          {!isLast ? (
-            <button
-              type="button"
-              onClick={() => setStep(step + 1)}
-              style={{
-                flex: 1,
-                padding: "0.85rem",
-                backgroundColor: "#0A2540",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "1rem",
-                fontWeight: "600",
-              }}
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="submit"
-              style={{
-                flex: 1,
-                padding: "0.85rem",
-                backgroundColor: "#C5A059",
-                color: "#0A2540",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "1rem",
-                fontWeight: "600",
-              }}
-            >
-              Submit to Register
-            </button>
-          )}
+        <div style={{ gridColumn: "1 / -1", marginTop: "1rem" }}>
+          <button
+            type="submit"
+            style={{
+              padding: "0.85rem 2rem",
+              backgroundColor: "#C5A059",
+              color: "#0A2540",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "1rem",
+              fontWeight: "600",
+            }}
+          >
+            Submit Asset
+          </button>
         </div>
       </form>
     </div>

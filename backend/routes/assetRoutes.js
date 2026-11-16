@@ -9,6 +9,7 @@ const {
   updateAsset,
   deleteAsset,
   importCSV,
+  updateAiRating,
 } = require("../controllers/assetController");
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -19,5 +20,6 @@ router.post("/", protect, createAsset);
 router.put("/:id", protect, updateAsset);
 router.delete("/:id", protect, deleteAsset);
 router.post("/import", protect, upload.single("file"), importCSV);
+router.patch("/:id/rating", protect, updateAiRating);
 
 module.exports = router;

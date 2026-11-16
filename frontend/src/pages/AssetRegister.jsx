@@ -59,15 +59,17 @@ const EDIT_FIELDS = [
 const inputStyle = {
   width: "100%",
   padding: "0.6rem",
-  border: "1px solid #cbd5e1",
+  border: "1px solid var(--border-color)",
   borderRadius: "4px",
   boxSizing: "border-box",
+  backgroundColor: "var(--bg-card)",
+  color: "var(--text-primary)",
 };
 const labelStyle = {
   display: "block",
   marginBottom: "0.35rem",
   fontWeight: "600",
-  color: "#0A2540",
+  color: "var(--text-primary)",
   fontSize: "0.85rem",
 };
 
@@ -198,7 +200,7 @@ export default function AssetRegister() {
   return (
     <div
       style={{
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--bg-card)",
         padding: "2.5rem",
         borderRadius: "8px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
@@ -206,7 +208,7 @@ export default function AssetRegister() {
     >
       <h2
         style={{
-          color: "#0A2540",
+          color: "var(--text-primary)",
           marginTop: 0,
           marginBottom: "1.5rem",
           borderBottom: "2px solid #C5A059",
@@ -221,15 +223,15 @@ export default function AssetRegister() {
         style={{
           marginBottom: "2rem",
           padding: "1.25rem",
-          backgroundColor: "#f8fafc",
-          border: "1px solid #e2e8f0",
+          backgroundColor: "var(--bg-primary)",
+          border: "1px solid var(--border-color)",
           borderRadius: "6px",
         }}
       >
         <h3
           style={{
             marginTop: 0,
-            color: "#0A2540",
+            color: "var(--text-primary)",
             fontSize: "1rem",
             marginBottom: "0.75rem",
           }}
@@ -251,7 +253,7 @@ export default function AssetRegister() {
               setFile(e.target.files[0]);
               setUploadMessage("");
             }}
-            style={{ fontSize: "0.9rem" }}
+            style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}
           />
           <button
             onClick={handleFileUpload}
@@ -307,8 +309,10 @@ export default function AssetRegister() {
             flex: 1,
             minWidth: "250px",
             padding: "0.75rem",
-            border: "1px solid #cbd5e1",
+            border: "1px solid var(--border-color)",
             borderRadius: "4px",
+            backgroundColor: "var(--bg-card)",
+            color: "var(--text-primary)",
           }}
         />
         <select
@@ -316,10 +320,11 @@ export default function AssetRegister() {
           onChange={(e) => setStatusFilter(e.target.value)}
           style={{
             padding: "0.75rem",
-            border: "1px solid #cbd5e1",
+            border: "1px solid var(--border-color)",
             borderRadius: "4px",
             minWidth: "150px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--bg-card)",
+            color: "var(--text-primary)",
           }}
         >
           <option value="all">All Statuses</option>
@@ -334,10 +339,11 @@ export default function AssetRegister() {
           onChange={(e) => setSdgFilter(e.target.value)}
           style={{
             padding: "0.75rem",
-            border: "1px solid #cbd5e1",
+            border: "1px solid var(--border-color)",
             borderRadius: "4px",
             minWidth: "150px",
-            backgroundColor: "#fff",
+            backgroundColor: "var(--bg-card)",
+            color: "var(--text-primary)",
           }}
         >
           <option value="all">All SDGs / Themes</option>
@@ -349,10 +355,12 @@ export default function AssetRegister() {
         </select>
       </div>
 
-      {loading && <p>Loading assets...</p>}
+      {loading && (
+        <p style={{ color: "var(--text-secondary)" }}>Loading assets...</p>
+      )}
       {error && <p style={{ color: "red" }}>{error}</p>}
       {!loading && !error && filteredAssets.length === 0 && (
-        <p style={{ color: "#64748b", fontStyle: "italic" }}>
+        <p style={{ color: "var(--text-secondary)", fontStyle: "italic" }}>
           No matching research assets found.
         </p>
       )}
@@ -370,9 +378,9 @@ export default function AssetRegister() {
             <thead>
               <tr
                 style={{
-                  backgroundColor: "#f1f5f9",
-                  borderBottom: "2px solid #cbd5e1",
-                  color: "#0A2540",
+                  backgroundColor: "var(--bg-primary)",
+                  borderBottom: "2px solid var(--border-color)",
+                  color: "var(--text-primary)",
                 }}
               >
                 {[
@@ -394,27 +402,47 @@ export default function AssetRegister() {
               {filteredAssets.map((asset) => (
                 <tr
                   key={asset._id}
-                  style={{ borderBottom: "1px solid #e2e8f0" }}
+                  style={{ borderBottom: "1px solid var(--border-color)" }}
                 >
                   <td
                     style={{
                       padding: "0.85rem",
-                      color: "#1e293b",
+                      color: "var(--text-primary)",
                       fontWeight: "500",
                     }}
                   >
                     {asset.title}
                   </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                  <td
+                    style={{
+                      padding: "0.85rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
                     {asset.assetType || "—"}
                   </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                  <td
+                    style={{
+                      padding: "0.85rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
                     {asset.school}
                   </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                  <td
+                    style={{
+                      padding: "0.85rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
                     {asset.discipline}
                   </td>
-                  <td style={{ padding: "0.85rem", color: "#475569" }}>
+                  <td
+                    style={{
+                      padding: "0.85rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
                     {asset.sdgTheme || "—"}
                   </td>
                   <td style={{ padding: "0.85rem" }}>
@@ -491,7 +519,7 @@ export default function AssetRegister() {
         >
           <div
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: "var(--bg-card)",
               borderRadius: "8px",
               maxWidth: "700px",
               width: "100%",
@@ -502,7 +530,7 @@ export default function AssetRegister() {
           >
             <h3
               style={{
-                color: "#0A2540",
+                color: "var(--text-primary)",
                 marginTop: 0,
                 borderBottom: "2px solid #C5A059",
                 paddingBottom: "0.5rem",
@@ -529,7 +557,10 @@ export default function AssetRegister() {
                           [f.name]: e.target.value,
                         })
                       }
-                      style={{ ...inputStyle, backgroundColor: "#fff" }}
+                      style={{
+                        ...inputStyle,
+                        backgroundColor: "var(--bg-card)",
+                      }}
                     >
                       {f.options.map((o) =>
                         typeof o === "string" ? (
