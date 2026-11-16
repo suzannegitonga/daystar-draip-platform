@@ -1,43 +1,161 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function SubmitAsset() {
-  const [formData, setFormData] = useState({
-    title: "",
-    school: "",
-    discipline: "",
-    status: "draft",
-  });
+const EMPTY_FORM = {
+  title: "",
+  school: "",
+  discipline: "",
+  assetType: "Thesis",
+  researchQuestion: "",
+  datasetAvailability: "",
+  sampleSize: "",
+  methodology: "",
+  findings: "",
+  novelty: "",
+  potentialUsers: "",
+  industryRelevance: "",
+  policyRelevance: "",
+  commercialPotential: "",
+  ipPotential: "",
+  publicationPotential: "",
+  sdgTheme: "",
+  keywords: "",
+  status: "draft",
+};
 
+const STEPS = [
+  {
+    name: "Identification",
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true },
+      { name: "school", label: "School", type: "text", required: true },
+      { name: "discipline", label: "Discipline", type: "text", required: true },
+      {
+        name: "assetType",
+        label: "Asset Type",
+        type: "select",
+        options: [
+          "Thesis",
+          "Dataset",
+          "Paper",
+          "Prototype",
+          "Algorithm",
+          "Innovation",
+        ],
+        required: true,
+      },
+    ],
+  },
+  {
+    name: "Research Substance",
+    fields: [
+      {
+        name: "researchQuestion",
+        label: "Research Question",
+        type: "textarea",
+      },
+      {
+        name: "datasetAvailability",
+        label: "Dataset Availability",
+        type: "text",
+      },
+      { name: "sampleSize", label: "Sample Size", type: "text" },
+      { name: "methodology", label: "Methodology", type: "textarea" },
+      { name: "findings", label: "Findings", type: "textarea" },
+      { name: "novelty", label: "Novelty", type: "textarea" },
+    ],
+  },
+  {
+    name: "Application Potential",
+    fields: [
+      { name: "potentialUsers", label: "Potential Users", type: "textarea" },
+      {
+        name: "industryRelevance",
+        label: "Industry Relevance",
+        type: "textarea",
+      },
+      { name: "policyRelevance", label: "Policy Relevance", type: "textarea" },
+      {
+        name: "commercialPotential",
+        label: "Commercial Potential",
+        type: "textarea",
+      },
+      { name: "ipPotential", label: "IP Potential", type: "textarea" },
+      {
+        name: "publicationPotential",
+        label: "Publication Potential",
+        type: "textarea",
+      },
+    ],
+  },
+  {
+    name: "Classification & Status",
+    fields: [
+      { name: "sdgTheme", label: "SDG / Theme", type: "text" },
+      { name: "keywords", label: "Keywords (comma-separated)", type: "text" },
+      {
+        name: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { value: "draft", label: "Draft" },
+          { value: "submitted", label: "Submitted" },
+          { value: "under_review", label: "Under Review" },
+          { value: "completed", label: "Completed" },
+          { value: "archived", label: "Archived" },
+        ],
+      },
+    ],
+  },
+];
+
+const inputStyle = {
+  width: "100%",
+  padding: "0.75rem",
+  border: "1px solid #cbd5e1",
+  borderRadius: "4px",
+  boxSizing: "border-box",
+};
+const labelStyle = {
+  display: "block",
+  marginBottom: "0.5rem",
+  fontWeight: "600",
+  color: "#0A2540",
+};
+
+export default function SubmitAsset() {
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [step, setStep] = useState(0);
   const [message, setMessage] = useState("");
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-
     try {
       const token = localStorage.getItem("token");
-
+      const payload = {
+        ...formData,
+        keywords: formData.keywords
+          ? formData.keywords
+              .split(",")
+              .map((k) => k.trim())
+              .filter(Boolean)
+          : [],
+      };
       const response = await axios.post(
         "http://localhost:5000/api/assets",
-        formData,
+        payload,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
-
       if (response.data.status === "success") {
         setMessage("Asset submitted successfully!");
-        setFormData({ title: "", school: "", discipline: "", status: "draft" });
+        setFormData(EMPTY_FORM);
+        setStep(0);
       }
     } catch (error) {
       setMessage(
@@ -46,6 +164,9 @@ export default function SubmitAsset() {
       );
     }
   };
+
+  const current = STEPS[step];
+  const isLast = step === STEPS.length - 1;
 
   return (
     <div
@@ -58,17 +179,14 @@ export default function SubmitAsset() {
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
       }}
     >
-      <h2
-        style={{
-          color: "#0A2540",
-          marginTop: 0,
-          marginBottom: "1.5rem",
-          borderBottom: "2px solid #f1f5f9",
-          paddingBottom: "0.75rem",
-        }}
-      >
+      <h2 style={{ color: "#0A2540", marginTop: 0, marginBottom: "0.5rem" }}>
         Submit Research Asset
       </h2>
+      <p
+        style={{ color: "#C5A059", fontWeight: "600", marginBottom: "1.5rem" }}
+      >
+        Step {step + 1} of {STEPS.length}: {current.name}
+      </p>
 
       {message && (
         <div
@@ -89,136 +207,110 @@ export default function SubmitAsset() {
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
       >
-        <div>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: "600",
-              color: "#0A2540",
-            }}
-          >
-            Title:
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              border: "1px solid #cbd5e1",
-              borderRadius: "4px",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
+        {current.fields.map((f) => (
+          <div key={f.name}>
+            <label style={labelStyle}>
+              {f.label}
+              {f.required ? " *" : ""}
+            </label>
+            {f.type === "select" ? (
+              <select
+                name={f.name}
+                value={formData[f.name]}
+                onChange={handleChange}
+                required={f.required}
+                style={{ ...inputStyle, backgroundColor: "#fff" }}
+              >
+                {f.options.map((o) =>
+                  typeof o === "string" ? (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ) : (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ),
+                )}
+              </select>
+            ) : f.type === "textarea" ? (
+              <textarea
+                name={f.name}
+                value={formData[f.name]}
+                onChange={handleChange}
+                rows={3}
+                style={inputStyle}
+              />
+            ) : (
+              <input
+                type="text"
+                name={f.name}
+                value={formData[f.name]}
+                onChange={handleChange}
+                required={f.required}
+                style={inputStyle}
+              />
+            )}
+          </div>
+        ))}
 
-        <div>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: "600",
-              color: "#0A2540",
-            }}
-          >
-            School:
-          </label>
-          <input
-            type="text"
-            name="school"
-            value={formData.school}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              border: "1px solid #cbd5e1",
-              borderRadius: "4px",
-              boxSizing: "border-box",
-            }}
-          />
+        <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={() => setStep(step - 1)}
+              style={{
+                flex: 1,
+                padding: "0.85rem",
+                backgroundColor: "#e2e8f0",
+                color: "#0A2540",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "600",
+              }}
+            >
+              Back
+            </button>
+          )}
+          {!isLast ? (
+            <button
+              type="button"
+              onClick={() => setStep(step + 1)}
+              style={{
+                flex: 1,
+                padding: "0.85rem",
+                backgroundColor: "#0A2540",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "600",
+              }}
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                padding: "0.85rem",
+                backgroundColor: "#C5A059",
+                color: "#0A2540",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontWeight: "600",
+              }}
+            >
+              Submit to Register
+            </button>
+          )}
         </div>
-
-        <div>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: "600",
-              color: "#0A2540",
-            }}
-          >
-            Discipline:
-          </label>
-          <input
-            type="text"
-            name="discipline"
-            value={formData.discipline}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              border: "1px solid #cbd5e1",
-              borderRadius: "4px",
-              boxSizing: "border-box",
-            }}
-          />
-        </div>
-
-        <div>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              fontWeight: "600",
-              color: "#0A2540",
-            }}
-          >
-            Status:
-          </label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              border: "1px solid #cbd5e1",
-              borderRadius: "4px",
-              boxSizing: "border-box",
-              backgroundColor: "#fff",
-            }}
-          >
-            <option value="draft">Draft</option>
-            <option value="under review">Under Review</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          style={{
-            padding: "0.85rem",
-            backgroundColor: "#00b4d8",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "1rem",
-            fontWeight: "600",
-            marginTop: "1rem",
-            transition: "background-color 0.2s",
-          }}
-          onMouseOver={(e) => (e.target.style.backgroundColor = "#0096c7")}
-          onMouseOut={(e) => (e.target.style.backgroundColor = "#00b4d8")}
-        >
-          Submit to Register
-        </button>
       </form>
     </div>
   );
