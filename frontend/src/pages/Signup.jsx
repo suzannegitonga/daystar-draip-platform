@@ -11,7 +11,6 @@ export default function Signup() {
     school: "",
   });
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) =>
@@ -131,35 +130,15 @@ export default function Signup() {
           </div>
           <div>
             <label style={labelStyle}>Password</label>
-            <div style={{ position: "relative" }}>
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength={6}
-                style={{ ...inputStyle, paddingRight: "3rem" }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: "0.75rem",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#64748b",
-                  fontSize: "0.8rem",
-                  fontWeight: "600",
-                }}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength={6}
+              style={inputStyle}
+            />
           </div>
           <div>
             <label style={labelStyle}>I am a...</label>
@@ -181,7 +160,6 @@ export default function Signup() {
               placeholder="e.g. Health Sciences"
               value={formData.school}
               onChange={handleChange}
-              required
               style={inputStyle}
             />
           </div>
