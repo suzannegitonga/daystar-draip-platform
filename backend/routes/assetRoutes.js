@@ -10,11 +10,13 @@ const {
   deleteAsset,
   importCSV,
   updateAiRating,
+  exportCSV,
 } = require("../controllers/assetController");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/", protect, getAllAssets);
+router.get("/export/csv", protect, exportCSV);
 router.get("/:id", protect, getAssetById);
 router.post("/", protect, createAsset);
 router.put("/:id", protect, updateAsset);

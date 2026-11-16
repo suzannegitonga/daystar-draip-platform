@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const API = "http://localhost:5000/api/assets";
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
 
 export default function LeadershipDashboard() {
   const [assets, setAssets] = useState([]);
@@ -10,9 +13,7 @@ export default function LeadershipDashboard() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const response = await axios.get(API, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const response = await axios.get(API, { headers: authHeaders() });
         setAssets(response.data.data);
         setLoading(false);
       } catch {
@@ -21,6 +22,28 @@ export default function LeadershipDashboard() {
     };
     fetchAll();
   }, []);
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await axios.get(`${API}/export/csv`, {
+        headers: authHeaders(),
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `draip-assets-${new Date().toISOString().split("T")[0]}.csv`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Export failed: " + (err.response?.data?.message || err.message));
+    }
+  };
 
   if (loading)
     return (
@@ -70,16 +93,35 @@ export default function LeadershipDashboard() {
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
       }}
     >
-      <h2
+      <div
         style={{
-          color: "var(--text-primary)",
-          marginTop: 0,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           borderBottom: "2px solid #C5A059",
           paddingBottom: "0.75rem",
+          marginBottom: "1.5rem",
         }}
       >
-        Leadership Dashboard
-      </h2>
+        <h2 style={{ color: "var(--text-primary)", margin: 0 }}>
+          Leadership Dashboard
+        </h2>
+        <button
+          onClick={handleExportCSV}
+          style={{
+            padding: "0.6rem 1.25rem",
+            backgroundColor: "#0A2540",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            fontWeight: "600",
+          }}
+        >
+          📥 Export CSV
+        </button>
+      </div>
 
       {/* KPI Cards */}
       <div
