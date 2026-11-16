@@ -1,4 +1,5 @@
 import { Link, useNavigate, Outlet } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 const NAV_ITEMS = [
   {
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
 
 export default function Layout() {
   const navigate = useNavigate();
+  const { dark, toggle } = useTheme();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const visibleNav = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
 
@@ -50,20 +52,22 @@ export default function Layout() {
       style={{
         display: "flex",
         height: "100vh",
-        backgroundColor: "#f4f6f9",
+        backgroundColor: "var(--bg-primary)",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        transition: "background-color 0.2s",
       }}
     >
       {/* Left Sidebar */}
       <aside
         style={{
           width: "260px",
-          backgroundColor: "#0A2540",
+          backgroundColor: "var(--sidebar-bg)",
           color: "white",
           display: "flex",
           flexDirection: "column",
           boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
           zIndex: 10,
+          transition: "background-color 0.2s",
         }}
       >
         {/* Logo Area */}
@@ -168,14 +172,31 @@ export default function Layout() {
         <header
           style={{
             height: "60px",
-            backgroundColor: "#0A2540",
+            backgroundColor: "var(--header-bg)",
             display: "flex",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             alignItems: "center",
             padding: "0 2rem",
             boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            transition: "background-color 0.2s",
           }}
         >
+          <button
+            onClick={toggle}
+            style={{
+              padding: "0.4rem 0.8rem",
+              backgroundColor: "var(--bg-card)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-color)",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              fontWeight: "600",
+              transition: "all 0.2s",
+            }}
+          >
+            {dark ? "☀️ Light" : "🌙 Dark"}
+          </button>
           <div
             style={{
               display: "flex",

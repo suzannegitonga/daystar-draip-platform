@@ -1,17 +1,39 @@
-:root {
+:root,
+:root[data-theme="light"] {
   --daystar-blue: #0a2540;
   --daystar-gold: #c5a059;
-  --daystar-light-bg: #f4f6f8;
+  --bg-primary: #f4f6f8;
+  --bg-card: #ffffff;
+  --text-primary: #0a2540;
+  --text-secondary: #475569;
   --text-main: #333333;
   --border-color: #e2e8f0;
+  --sidebar-bg: #0a2540;
+  --header-bg: #0a2540;
+}
+
+:root[data-theme="dark"] {
+  --daystar-blue: #0a2540;
+  --daystar-gold: #c5a059;
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-main: #e2e8f0;
+  --border-color: #334155;
+  --sidebar-bg: #020617;
+  --header-bg: #020617;
 }
 
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--daystar-light-bg);
+  background-color: var(--bg-primary);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 /* Global button styles */

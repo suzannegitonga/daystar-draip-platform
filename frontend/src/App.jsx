@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 import SubmitAsset from "./pages/SubmitAsset";
 import AssetRegister from "./pages/AssetRegister";
 import MyAssets from "./pages/MyAssets";
@@ -17,26 +18,28 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/submit" element={<SubmitAsset />} />
-          <Route path="/register" element={<AssetRegister />} />
-          <Route path="/my-assets" element={<MyAssets />} />
-          <Route path="/review" element={<ReviewQueue />} />
-          <Route path="/leadership" element={<LeadershipDashboard />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/submit" element={<SubmitAsset />} />
+            <Route path="/register" element={<AssetRegister />} />
+            <Route path="/my-assets" element={<MyAssets />} />
+            <Route path="/review" element={<ReviewQueue />} />
+            <Route path="/leadership" element={<LeadershipDashboard />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
